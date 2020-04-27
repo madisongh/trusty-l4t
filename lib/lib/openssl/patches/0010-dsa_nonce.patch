@@ -1,0 +1,13 @@
+--- openssl-1.0.2q.orig/crypto/bn/bn.h	2019-02-20 10:44:15.736572650 +0000
++++ openssl-1.0.2q/crypto/bn/bn.h	2019-02-20 10:44:15.796572652 +0000
+@@ -720,6 +720,10 @@ const BIGNUM *BN_get0_nist_prime_256(voi
+ const BIGNUM *BN_get0_nist_prime_384(void);
+ const BIGNUM *BN_get0_nist_prime_521(void);
+ 
++int BN_generate_dsa_nonce(BIGNUM *out, const BIGNUM *range, const BIGNUM *priv,
++			  const unsigned char *message, size_t message_len,
++			  BN_CTX *ctx);
++
+ /* library internal functions */
+ 
+ # define bn_expand(a,bits) \

@@ -32,4 +32,4 @@ TOP := $(TEGRA_TOP)
 TRUSTY_ALL_USER_TASKS := \
 	sample/ipc-unittest/main \
 	sample/ipc-unittest/srv \
-	keystore-demo
+	sample/hwkey-agent
