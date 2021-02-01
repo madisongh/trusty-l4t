@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2018-2019, NVIDIA CORPORATION. All rights reserved
+# Copyright (c) 2018-2020, NVIDIA CORPORATION. All rights reserved
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files
@@ -31,5 +31,11 @@ TOP := $(TEGRA_TOP)
 # L4T only builds some test applications
 TRUSTY_ALL_USER_TASKS := \
 	sample/ipc-unittest/main \
-	sample/ipc-unittest/srv \
-	sample/hwkey-agent
+	sample/ipc-unittest/srv
+
+# Disable TAs from nvidia-sample for OTE to avoid conflict
+ifeq ($(filter l4t-partner-ote, $(TRUSTY_VARIANT)),)
+TRUSTY_ALL_USER_TASKS += \
+	nvidia-sample/hwkey-agent \
+	nvidia-sample/luks-srv
+endif

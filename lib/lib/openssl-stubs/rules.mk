@@ -6,7 +6,8 @@ MODULE_USER := true
 MODULE_SRCS := \
 	$(LOCAL_DIR)/bio.c \
 	$(LOCAL_DIR)/rand.c \
-	$(LOCAL_DIR)/sscanf.c
+	$(LOCAL_DIR)/sscanf.c \
+	$(LOCAL_DIR)/strcasecmp.c
 
 MODULE_DEPS := \
 	lib/rng
