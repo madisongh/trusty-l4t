@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, NVIDIA Corporation. All Rights Reserved.
+ * Copyright (c) 2021, NVIDIA Corporation. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,62 +20,26 @@
  * THE SOFTWARE.
  */
 
-#include <common.h>
 #include <err.h>
-#include <ipc.h>
-#include <key_mgnt.h>
-#include <stdio.h>
-#include <trusty_std.h>
+#include <rng_srv.h>
+#include <string.h>
 #include <tegra_se_rng1.h>
 
-/*
- * @brief hwkey-agent TA
- *
- * @return NO_ERROR if successful
- */
-int main(void)
+void rng_srv_process_req(iovec_t *ipc_msg)
 {
-	int rc = NO_ERROR;
-	uevent_t event;
+	int rc;
+	rng_srv_msg_t *msg = ipc_msg->base;
+	uint32_t req_size = msg->rng_size;
 
-	TLOGI("hwkey-agent is running!!\n");
-
-	rc = key_mgnt_processing();
-	if (rc != NO_ERROR) {
-		TLOGE("%s: Failed to verify or extract EKB (%d).\n", __func__, rc);
-		return rc;
+	if (req_size > RNG_SRV_DATA_SIZE) {
+		msg->rng_size = 0;
+		return;
 	}
 
-	rc = se_rng1_init();
-	if (rc != NO_ERROR) {
-		TLOGE("%s: Failed to init SE RNG1 module.\n", __func__);
-		return rc;
+	rc = se_rng1_get_random(msg->rng_data, req_size);
+	if (rc < NO_ERROR) {
+		memset(msg->rng_data, 0, req_size);
+		msg->rng_size = 0;
 	}
 
-	/* Initialize IPC service */
-	rc = init_hwkey_agent_srv();
-	if (rc != NO_ERROR ) {
-		TLOGI("Failed (%d) to init IPC service", rc);
-		kill_hwkey_agent_srv();
-		return -1;
-	}
-
-	/* Handle IPC service events */
-	do {
-		event.handle = INVALID_IPC_HANDLE;
-		event.event  = 0;
-		event.cookie = NULL;
-
-		rc = wait_any(&event, -1);
-		if (rc < 0) {
-			TLOGI("wait_any failed (%d)", rc);
-			continue;
-		}
-
-		if (rc == NO_ERROR) { /* got an event */
-			dispatch_hwkey_agent_srv_event(&event);
-		}
-	} while(1);
-
-	return rc;
 }
